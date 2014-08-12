@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <title>TODO supply a title</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <script src="http://maps.googleapis.com/maps/api/js?key=AIzaSyDdN1ol6Zqlj9kmsK3pFn9ly15P3dzzEWo
+                &sensor=false"
+        type="text/javascript"></script> 
+        <script src="jquery-1.11.1.js"></script>
+
+        <script type="text/javascript">
+            var geocoder;
+            var map;
+
+            function initialize() {
+                geocoder = new google.maps.Geocoder();
+                map = new google.maps.Map(document.getElementById("map"), {
+                    center: new google.maps.LatLng(37.764912989285, -122.41988401842),
+                    zoom: 12,
+                    mapTypeId: google.maps.MapTypeId.ROADMAP
+                });
+                // this is a global variable because we need only one infowindow open at a time
+                // we reuse this infowindow and change its content depending on which marker was clicked on
+                infowindow = new google.maps.InfoWindow({
+                    content: ""
+                });
+            }
+
+            function codeAddress(address, message) {
+                if (address !== null) {
+                    address += ", San Francisco, CA";
+                    geocoder.geocode({'address': address}, function(results, status) {
+                        if (status === google.maps.GeocoderStatus.OK) {
+                            var marker = new google.maps.Marker({
+                                map: map,
+                                position: results[0].geometry.location
+                            });
+                            google.maps.event.addDomListener(marker, "click", function()
+                            {
+                                infowindow.setContent(message);
+                                infowindow.open(map, marker);
+                            });
+                        } else {
+                            console.log("Geocode was not successful for the following reason: " + status);
+                        }
+                    });
+                }
+            }
+
+            google.maps.event.addDomListener(window, 'load', initialize);
+            //]]>                                                   
+        </script>
+        <script>
+            $(document).ready(function() {
+                $.getJSON("locations.json", function(data) {
+                    var locs = data.data;
+                    for (var i = 0; i < 20; i++) {
+//                        console.log(locs[i][10]);
+                        console.log(locs[i][10] + " " + locs[i][8])
+                        codeAddress(locs[i][10], locs[i][8]);
+                    }
+                });
+            });
+        </script>
+
+
+    </head>
+    <body>
+        <div id="map" style="width: 800px; height: 500px"></div>
+
+    </body>
+</html>
